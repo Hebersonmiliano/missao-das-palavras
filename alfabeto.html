@@ -12,6 +12,15 @@
 <main class="content">
   <a href="./" style="color:#083d77;font-weight:800">Voltar ao jogo</a>
   <h1 class="screen-title">Alfabeto de A a Z</h1>
+  <button id="start-match" class="primary" type="button">Jogar: Encontre a letra</button>
+  <section id="match" hidden aria-labelledby="match-title">
+    <h2 id="match-title" tabindex="-1">Encontre a letra igual</h2>
+    <p id="match-progress"></p>
+    <div id="match-target" class="letter"></div>
+    <div id="match-choices" class="choices"></div>
+    <p id="match-feedback" role="status"></p>
+    <button id="match-next" class="secondary" type="button" hidden>Próxima letra</button>
+  </section>
   <p class="subtitle">Toque em uma letra para ouvir seu nome e uma palavra de exemplo. 🔊</p>
   <p id="message" role="status"></p>
   <div id="alphabet" class="alphabet"></div>
@@ -20,6 +29,70 @@
   const names = 'á bê cê dê é efe gê agá i jota cá ele eme ene ó pê quê erre esse tê u vê dáblio xis ípsilon zê'.split(' ');
   const words = 'água bola casa dado escola feira gato hora ilha jogo kart livro mercado nuvem ovo papel queijo rua sol telefone uva vídeo wi-fi xadrez yoga zebra'.split(' ');
   const grid = document.querySelector('#alphabet');
+  const alphabet = [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'];
+  const match = document.querySelector('#match');
+  const progress = document.querySelector('#match-progress');
+  const target = document.querySelector('#match-target');
+  const choices = document.querySelector('#match-choices');
+  const feedback = document.querySelector('#match-feedback');
+  const next = document.querySelector('#match-next');
+  let round = 0;
+
+  function shuffle(items) {
+    for (let i = items.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [items[i], items[j]] = [items[j], items[i]];
+    }
+    return items;
+  }
+
+  function showRound() {
+    const letter = alphabet[round];
+    choices.replaceChildren();
+    next.hidden = true;
+    feedback.textContent = '';
+    progress.textContent = (round + 1) + ' de ' + alphabet.length;
+    target.textContent = letter;
+    const distractors = shuffle(alphabet.filter(option => option !== letter)).slice(0, 3);
+    for (const option of shuffle([letter, ...distractors])) {
+      const button = document.createElement('button');
+      button.className = 'choice';
+      button.textContent = option;
+      button.onclick = () => {
+        if (option !== letter) {
+          feedback.textContent = 'Tente de novo. Procure a letra ' + letter + '.';
+          return;
+        }
+        button.classList.add('correct');
+        feedback.textContent = 'Muito bem! Você encontrou a letra ' + letter + '.';
+        for (const choice of choices.children) choice.disabled = true;
+        next.textContent = round === alphabet.length - 1 ? 'Ver resultado' : 'Próxima letra';
+        next.hidden = false;
+        next.focus();
+      };
+      choices.append(button);
+    }
+    document.querySelector('#match-title').focus();
+  }
+
+  document.querySelector('#start-match').onclick = () => {
+    round = 0;
+    match.hidden = false;
+    showRound();
+  };
+  next.onclick = () => {
+    round++;
+    if (round < alphabet.length) {
+      showRound();
+      return;
+    }
+    choices.replaceChildren();
+    progress.textContent = '';
+    target.textContent = '';
+    next.hidden = true;
+    feedback.textContent = 'Missão concluída! Você encontrou as 26 letras.';
+    document.querySelector('#start-match').focus();
+  };
   [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'].forEach((letter, index) => {
     const button = document.createElement('button');
     const pair = document.createElement('span');
@@ -42,3 +115,4 @@
   });
 </script>
 </html>
+
