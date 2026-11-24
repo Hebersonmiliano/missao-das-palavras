@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt-BR">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alfabeto • Missão das Palavras</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  .alphabet {display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:.75rem;margin-top:1.5rem}
+  .alphabet button {padding:.75rem;min-height:7rem}
+  .letter {display:block;font-size:2rem}
+</style>
+<main class="content">
+  <a href="./" style="color:#083d77;font-weight:800">Voltar ao jogo</a>
+  <h1 class="screen-title">Alfabeto de A a Z</h1>
+  <p class="subtitle">Toque em uma letra para ouvir seu nome e uma palavra de exemplo. 🔊</p>
+  <p id="message" role="status"></p>
+  <div id="alphabet" class="alphabet"></div>
+</main>
+<script>
+  const names = 'á bê cê dê é efe gê agá i jota cá ele eme ene ó pê quê erre esse tê u vê dáblio xis ípsilon zê'.split(' ');
+  const words = 'água bola casa dado escola feira gato hora ilha jogo kart livro mercado nuvem ovo papel queijo rua sol telefone uva vídeo wi-fi xadrez yoga zebra'.split(' ');
+  const grid = document.querySelector('#alphabet');
+  [...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'].forEach((letter, index) => {
+    const button = document.createElement('button');
+    const pair = document.createElement('span');
+    pair.className = 'letter';
+    pair.textContent = letter + ' ' + letter.toLowerCase();
+    button.className = 'choice';
+    button.append(pair, words[index]);
+    button.onclick = () => {
+      if (!('speechSynthesis' in window)) {
+        document.querySelector('#message').textContent = 'O áudio não está disponível neste navegador.';
+        return;
+      }
+      speechSynthesis.cancel();
+      const voice = new SpeechSynthesisUtterance(names[index] + '. ' + words[index] + '.');
+      voice.lang = 'pt-BR';
+      voice.rate = 0.85;
+      speechSynthesis.speak(voice);
+    };
+    grid.append(button);
+  });
+</script>
+</html>
